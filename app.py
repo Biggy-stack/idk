@@ -169,3 +169,4 @@ def update_charts(region, avocado_type, start_date, end_date):
 
 if __name__ == "__main__":
     app.run_server(debug=True)
+
