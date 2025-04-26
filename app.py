@@ -1,3 +1,9 @@
+## =============== TODO LIST =================== ##
+## - Fix the axis labels on graphs one and two - ##
+## -             GUI improvement               - ##
+## -          Fix font (comic sans?)           - ##
+## ============================================= ##
+
 ## IMPORT DEPENDENCIES ##
 from dash import dash, dcc, html, Input, Output
 import pandas as pd
@@ -6,27 +12,14 @@ import os
 import plotly.express as px
 ## ------------------- ##
 
-## TO-DO LIST
-
-## - Left off working on divs for graph attribute separation
-
-## - separate the different attributes into selectable areas (maybe isolate columns by row 0?)
-## - display the different graphs side by side
-## - cute-ify the whole thing
-## - PROFIT
-
-##
-
-os.chdir(r"C:\Users\caste\Desktop\jupyter_workingdirs\bme_finalProject")
-
-
-data = pd.read_csv(r"C:\Users\caste\Desktop\jupyter_workingdirs\bme_finalProject\data\covid19data.csv", thousands=",") ## Reads the .csv
-dataArray = data.values ## Turns the data into an array to slice for later usage
+## File reading code
+path = "C:/Users/caste/Desktop/jupyter_workingdirs/bme_finalProject/data/covid19data.csv" ## TODO: pleas find out how to use the working directory to access the data file so we don't keep accessing it manually 😭😭
+data = pd.read_csv(path, thousands=",") ## Reads the .csv
 data["collection_date"] = pd.to_datetime(data["collection_date"], format="%Y-%m-%d") ## Converts the collection dates to the format
 data.sort_values("collection_date", inplace=True) ## Sorts the dates chronologically
 
 
-## IMPORT FREDOKA FONT (roblox font >:]) ##
+## IMPORT FREDOKA FONT || Sidenote: this doesn't work? help? can we replace this with comic sans? :[ ##
 external_stylesheets = [
     {
         "href": "https://fonts.googleapis.com/css2?family=Fredoka"
@@ -38,7 +31,7 @@ external_stylesheets = [
 ## App properties
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
-app.title = "ECUP (Extremely Cool and Unparalleled Project)"
+app.title = "Analysis Project"
 
 ## Main Gui
 app.layout = html.Div(
@@ -49,10 +42,10 @@ app.layout = html.Div(
             html.Center(
                 children=[
                     html.P(
-                        children="Extremely Cool and Unparalleled Project", className="headerTitle"
+                        children="Where's everyone going? Bingo?", className="headerTitle"
                     ),
                     html.H1(
-                        children="ECAP", className="header"
+                        children="Super Awesome Data Analysis Project (created in Python with love)", className="header"
                     ),
                     html.P(
                         children="===============================================", className="headerTitle"
@@ -189,6 +182,7 @@ app.layout = html.Div(
         Input(component_id="dateRange", component_property="end_date"),
     ]
 )
+## Main app callback function
 def update(state1, attribute1, state2, attribute2, startDate, endDate):
     ## Filter Dataset One for graph one
     mask1 = (
@@ -223,5 +217,6 @@ def update(state1, attribute1, state2, attribute2, startDate, endDate):
 
     return chartOne, chartTwo
 
+## Main thread
 if __name__ == "__main__":
-    app.run (debug=True) 
+    app.run(debug=True)
