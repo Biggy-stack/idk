@@ -1,171 +1,227 @@
-import dash
-import dash_core_components as dcc
-import dash_html_components as html
+## IMPORT DEPENDENCIES ##
+from dash import dash, dcc, html, Input, Output
 import pandas as pd
 import numpy as np
-from dash.dependencies import Output, Input
+import os
+import plotly.express as px
+## ------------------- ##
 
-data = pd.read_csv("data/avocado.csv")
-data["Date"] = pd.to_datetime(data["Date"], format="%Y-%m-%d")
-data.sort_values("Date", inplace=True)
-data['type'] = data['type'].apply(lambda x: x.capitalize())
+## TO-DO LIST
 
+## - Left off working on divs for graph attribute separation
+
+## - separate the different attributes into selectable areas (maybe isolate columns by row 0?)
+## - display the different graphs side by side
+## - cute-ify the whole thing
+## - PROFIT
+
+##
+
+os.chdir(r"C:\Users\caste\Desktop\jupyter_workingdirs\bme_finalProject")
+
+
+data = pd.read_csv(r"C:\Users\caste\Desktop\jupyter_workingdirs\bme_finalProject\data\covid19data.csv", thousands=",") ## Reads the .csv
+dataArray = data.values ## Turns the data into an array to slice for later usage
+data["collection_date"] = pd.to_datetime(data["collection_date"], format="%Y-%m-%d") ## Converts the collection dates to the format
+data.sort_values("collection_date", inplace=True) ## Sorts the dates chronologically
+
+
+## IMPORT FREDOKA FONT (roblox font >:]) ##
 external_stylesheets = [
     {
-        "href": "https://fonts.googleapis.com/css2?"
-        "family=Lato:wght@400;700&display=swap",
+        "href": "https://fonts.googleapis.com/css2?family=Fredoka"
+        "family=Lato:wght@300..700&display=swap",
         "rel": "stylesheet",
     },
 ]
+
+## App properties
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
-app.title = "Avocado Analytics: Understand Your Avocados!"
+app.title = "ECUP (Extremely Cool and Unparalleled Project)"
 
+## Main Gui
 app.layout = html.Div(
+    ## Main Div
     children=[
+        ## Title Div
+        html.Div(
+            html.Center(
+                children=[
+                    html.P(
+                        children="Extremely Cool and Unparalleled Project", className="headerTitle"
+                    ),
+                    html.H1(
+                        children="ECAP", className="header"
+                    ),
+                    html.P(
+                        children="===============================================", className="headerTitle"
+                    ),
+                ],
+                className="header"
+            ),
+        ),
+        ## Date Range Div
         html.Div(
             children=[
-                html.P(children="🥑", className="header-emoji"),
-                html.H1(
-                    children="Avocado Analytics", className="header-title"
-                ),
                 html.P(
-                    children="Analyze the behavior of avocado prices"
-                    " and the number of avocados sold in the US"
-                    " between 2015 and 2018",
-                    className="header-description",
+                    children="Date Range", className="title"
+                ),
+                dcc.DatePickerRange(
+                    id="dateRange",
+                    min_date_allowed=data.collection_date.min().date(),
+                    max_date_allowed=data.collection_date.max().date(),
+                    start_date=data.collection_date.min().date(),
+                    end_date=data.collection_date.max().date(),
                 ),
             ],
-            className="header",
         ),
+        ## Graph One Parameter Div Container
         html.Div(
             children=[
+                ## Dropdown Div (State, Graph One)
                 html.Div(
                     children=[
-                        html.Div(children="Region", className="menu-title"),
-                        dcc.Dropdown(
-                            id="region-filter",
-                            options=[
-                                {"label": region, "value": region}
-                                for region in np.sort(data.region.unique())
-                            ],
-                            value="Albany",
-                            clearable=False,
-                            className="dropdown",
+                        html.P(
+                            children="State (Graph #1)", className="graph1State"
                         ),
-                    ]
-                ),
-                html.Div(
-                    children=[
-                        html.Div(children="Type", className="menu-title"),
-                        dcc.Dropdown(
-                            id="type-filter",
-                            options=[
-                                {"label": avocado_type, "value": avocado_type}
-                                for avocado_type in data.type.unique()
-                            ],
-                            value="Organic",
-                            clearable=False,
-                            searchable=False,
-                            className="dropdown",
+                        dcc.Checklist(
+                            id="state-filter1",
+                            options=np.sort(data.state.unique()),
+                            value=["AK"], ## default state
+                            className="checkbox",
+                            inline=True,
                         ),
                     ],
                 ),
+                ## Dropdown Div (Attribute, Graph One)
                 html.Div(
                     children=[
-                        html.Div(
-                            children="Date Range", className="menu-title"
+                        html.P(
+                            children="Attribute (Graph #1)", className="attribute1State"
                         ),
-                        dcc.DatePickerRange(
-                            id="date-range",
-                            min_date_allowed=data.Date.min().date(),
-                            max_date_allowed=data.Date.max().date(),
-                            start_date=data.Date.min().date(),
-                            end_date=data.Date.max().date(),
+                        dcc.Dropdown(
+                            id="attribute-filter1",
+                            options=[
+                                {"label" : attribute, "value" : attribute} for attribute in np.sort(data.columns[2:].unique())
+                            ],
+                            value="Count LL (All Inpatient)", ## default attribute
+                            clearable=False,
+                            className="dropdown"
                         ),
-                    ]
+                    ],
                 ),
             ],
-            className="menu",
         ),
+        ## Graph Two Parameter Div Container
         html.Div(
             children=[
+                ## Dropdown Div (State, Graph Two)
+                html.Div(
+                    children=[
+                        html.P(
+                            children="State (Graph #2)", className="graph2State"
+                        ),
+                        dcc.Checklist(
+                            id="state-filter2",
+                            options=np.sort(data.state.unique()),
+                            value=["AK"], ## default state
+                            className="checkbox",
+                            inline=True,
+                        ),
+                    ],
+                ),
+                ## Dropdown Div (Attribute, Graph Two)
+                html.Div(
+                    children=[
+                        html.P(
+                            children="Attribute (Graph #2)", className="attribute2State"
+                        ),
+                        dcc.Dropdown(
+                            id="attribute-filter2",
+                            options=[
+                                {"label" : attribute, "value" : attribute} for attribute in np.sort(data.columns[2:].unique())
+                            ],
+                            value="Count LL (All Inpatient)", ## default attribute
+                            clearable=False,
+                            className="dropdown"
+                        ),
+                    ],
+                ),
+            ],
+        ),
+        ## Graph Containers
+        html.Div(
+           children=[
                 html.Div(
                     children=dcc.Graph(
-                        id="price-chart",
+                        id="GraphOne",
                         config={"displayModeBar": False},
                     ),
                     className="card",
                 ),
                 html.Div(
                     children=dcc.Graph(
-                        id="volume-chart",
+                        id="GraphTwo",
                         config={"displayModeBar": False},
                     ),
                     className="card",
                 ),
             ],
-            className="wrapper",
+            className="wrapper",           
         ),
+    ],
+
+)
+
+## Main app callback
+@app.callback(
+    [
+        Output(component_id="GraphOne", component_property="figure"),
+        Output(component_id="GraphTwo", component_property="figure"),
+    ],
+    [
+        Input(component_id="state-filter1", component_property="value"),
+        Input(component_id="attribute-filter1", component_property="value"),
+        Input(component_id="state-filter2", component_property="value"),
+        Input(component_id="attribute-filter2", component_property="value"),
+        Input(component_id="dateRange", component_property="start_date"),
+        Input(component_id="dateRange", component_property="end_date"),
     ]
 )
-
-
-@app.callback(
-    [Output("price-chart", "figure"), Output("volume-chart", "figure")],
-    [
-        Input("region-filter", "value"),
-        Input("type-filter", "value"),
-        Input("date-range", "start_date"),
-        Input("date-range", "end_date"),
-    ],
-)
-def update_charts(region, avocado_type, start_date, end_date):
-    mask = (
-        (data.region == region)
-        & (data.type == avocado_type)
-        & (data.Date >= start_date)
-        & (data.Date <= end_date)
+def update(state1, attribute1, state2, attribute2, startDate, endDate):
+    ## Filter Dataset One for graph one
+    mask1 = (
+        (data.state.isin(state1))
+        &(data.collection_date >= startDate)
+        & (data.collection_date <= endDate) 
     )
-    filtered_data = data.loc[mask, :]
-    price_chart_figure = {
-        "data": [
-            {
-                "x": filtered_data["Date"],
-                "y": filtered_data["AveragePrice"],
-                "type": "lines",
-                "hovertemplate": "$%{y:.2f}<extra></extra>",
-            },
-        ],
-        "layout": {
-            "title": {
-                "text": "Average Price of Avocados",
-                "x": 0.05,
-                "xanchor": "left",
-            },
-            "xaxis": {"fixedrange": True},
-            "yaxis": {"tickprefix": "$", "fixedrange": True},
-            "colorway": ["#17B897"],
-        },
-    }
+    filteredData1 = data.loc[mask1, :]
 
-    volume_chart_figure = {
-        "data": [
-            {
-                "x": filtered_data["Date"],
-                "y": filtered_data["Total Volume"],
-                "type": "lines",
-            },
-        ],
-        "layout": {
-            "title": {"text": "Avocados Sold", "x": 0.05, "xanchor": "left"},
-            "xaxis": {"fixedrange": True},
-            "yaxis": {"fixedrange": True},
-            "colorway": ["#E12D39"],
-        },
-    }
-    return price_chart_figure, volume_chart_figure
+    ## Filter Dataset Two for graph two
+    mask2 = (
+        (data.state.isin(state2))
+        &(data.collection_date >= startDate)
+        & (data.collection_date <= endDate) 
+    )
+    filteredData2 = data.loc[mask2, :]
 
+    ## Set up graphs
+    chartOne = px.line(
+        data_frame = filteredData1,
+        x = filteredData1.collection_date,
+        y = np.sort(filteredData1[str(attribute1)].apply(pd.to_numeric)),
+        color=filteredData1["state"]
+    )
+
+    chartTwo = px.line(
+        data_frame = filteredData2,
+        x = filteredData2.collection_date,
+        y = np.sort(filteredData2[str(attribute2)].apply(pd.to_numeric)),  
+        color=filteredData2["state"] 
+    )
+
+    return chartOne, chartTwo
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run (debug=True) 
