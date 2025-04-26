@@ -5,10 +5,12 @@ import pandas as pd
 import numpy as np
 from dash.dependencies import Output, Input
 
-data = pd.read_csv("data/avocado.csv")
-data["Date"] = pd.to_datetime(data["Date"], format="%Y-%m-%d")
-data.sort_values("Date", inplace=True)
-data['type'] = data['type'].apply(lambda x: x.capitalize())
+data = (
+    pd.read_csv("data\\COVID-19_Estimated_Patient_Impact_and_Hospital_Capacity_by_State_20250309.csv")
+    .query("state == 'CA'")
+    .assign(Date=lambda data: pd.to_datetime(data["collection_date"], format="%Y/%m/%d"))
+    .sort_values(by="Date")
+)
 
 external_stylesheets = [
     {
