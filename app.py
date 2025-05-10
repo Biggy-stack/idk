@@ -1,9 +1,6 @@
-## v0.3 changelog
-## -- fixed the fonts (yay css!)
-## -- did a LOT of gui work (moving background!!!!)
-
-## todo
-## there's a bug with the gui where the css stuff doesn't load in time with the graphs, and the margins break and blah blah... I HATE GUI >:[ // ps - i gave up on the margin. no more bottom margin.
+## v0.4 changelog
+## -- critical bug fix (messed with the graphs and datasets displayed)
+## -- note: there's strange stuff in the .csv, like negative numbers and percents that go past 100?
 
 ## IMPORT DEPENDENCIES ##
 from dash import dash, dcc, html, Input, Output, callback, ctx
@@ -19,7 +16,7 @@ import io
 sourcepath = os.path.dirname(os.path.abspath(__file__))
 path = os.path.join(sourcepath, "data", "covid19data.csv") ## had to use os because the python file wasn't starting in the source folder for some reason??? guess this is more thorough though
 data = pd.read_csv(path, thousands=",") ## Reads the .csv
-data["collection_date"] = pd.to_datetime(data["collection_date"], format="%Y-%m-%d") ## Converts the collection dates to the format
+data["collection_date"] = pd.to_datetime(data["collection_date"], format="%Y/%m/%d") ## Converts the collection dates to the format
 data.sort_values("collection_date", inplace=True) ## Sorts the dates chronologically
 
 ## App properties
@@ -36,13 +33,13 @@ app.layout = html.Div(
             html.Center(
                 children=[
                     html.P(
-                        children="Version 0.3", className="title"
+                        children="Version 0.4", className="title"
                     ),
                     html.P(
-                        children='i will now cook the "berried delight" - vergil', className="title"
+                        children='"so can we wander for a spell? live in parallel?" - kasane teto, machine love', className="title"
                     ),
                     html.H1(
-                        children="Data Analysis Project of Love and Prosperity", className="mainTitle"
+                        children="Data Analysis Project of Machines and Love", className="mainTitle"
                     ),
                     html.P(
                         children="===============================================", className="title"
@@ -227,7 +224,7 @@ def update(state1, attribute1, state2, attribute2, startDate, endDate, n_clicks)
     chartOne = px.line(
         data_frame = filteredData1,
         x = filteredData1.collection_date,
-        y = np.sort(filteredData1[str(attribute1)].apply(pd.to_numeric)),
+        y = filteredData1[str(attribute1)].apply(pd.to_numeric),
         color = filteredData1["state"],
         labels = {'collection_date': "Date", 'y': attribute1},
         title = f'Graph One: {attribute1} from {startDate} to {endDate}.',
@@ -242,7 +239,7 @@ def update(state1, attribute1, state2, attribute2, startDate, endDate, n_clicks)
     chartTwo = px.line(
         data_frame = filteredData2,
         x = filteredData2.collection_date,
-        y = np.sort(filteredData2[str(attribute2)].apply(pd.to_numeric)),  
+        y = filteredData2[str(attribute2)].apply(pd.to_numeric),  
         color = filteredData2["state"] ,
         labels = {'collection_date': "Date", 'y': attribute2},
         title = f'Graph Two: {attribute2} from {startDate} to {endDate}.',
